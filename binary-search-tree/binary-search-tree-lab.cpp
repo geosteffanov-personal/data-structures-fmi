@@ -2,7 +2,15 @@
 #include <fstream>
 #include <assert.h>
 #include <queue>
+#include <cmath>
 #include <vector>
+            /* dali edno darvo ima pat ot koren do listo, koito
+               u4astwa kato pat koren listo v drugo no v obraten
+               red
+            */
+
+            /* dali dadeni niva v dwe darveta */
+
 using namespace std;
 template <typename T>
 struct Node {
@@ -152,6 +160,93 @@ class BSTree {
                 isomorphicTo(subTreeRoot->right, subTreeOther->right);
     }
 
+    bool member(Node<T>* subTreeRoot, const T& element) const {
+        if (subTreeRoot == nullptr)
+            return false;
+        if (subTreeRoot->data == element)
+            return true;
+        if (subTreeRoot->data >= element) {
+            return member(subTreeRoot->left, element);
+        }
+        return member(subTreeRoot->right, element);
+
+    }
+
+    void findAllPaths(Node<T>* subTreeRoot, vector<T> &currPath, vector<vector<T>> &allPaths) {
+        if (subTreeRoot == NULL){
+            cout << "NULL" << endl;
+            return;
+        }
+        currPath.push_back(subTreeRoot->data);
+        if (subTreeRoot->left == NULL && subTreeRoot->right == NULL) {
+            allPaths.push_back(currPath);
+        } else {
+            findAllPaths(subTreeRoot->left, currPath, allPaths);
+            findAllPaths(subTreeRoot->right, currPath, allPaths);
+        }
+        currPath.pop_back();
+    }
+
+    int size(Node<T>* subTreeRoot) const {
+        if (subTreeRoot == nullptr)
+            return 0;
+
+        return 1 + size(subTreeRoot->left) + size(subTreeRoot->right);
+    }
+
+    bool isBalanced(Node<T>* subTreeRoot) const {
+        if (subTreeRoot == nullptr) {
+            return true;
+        }
+        return (abs(size(subTreeRoot->left) - size(subTreeRoot->right)) <= 1) &&
+                isBalanced(subTreeRoot->left) && isBalanced(subTreeRoot->right);
+    }
+
+    T sameParent(Node<T>* subTreeRoot, T firstElem, T secondElem) {
+        bool firstIsMemberLeft = member(subTreeRoot->left, firstElem);
+        bool secondIsMemberRight = member(subTreeRoot->right, secondElem);
+
+        bool firstIsMemberRight = member(subTreeRoot->right, firstElem);
+        bool secondIsMemberLeft = member(subTreeRoot->left, secondElem);
+
+        if ((firstIsMemberLeft && secondIsMemberRight) ||
+            (firstIsMemberRight && secondIsMemberLeft))
+            return subTreeRoot->data;
+
+
+        else if (firstIsMemberLeft) {
+                /* dwete sa left memberi */
+                if ((subTreeRoot->left->data == firstElem) ||
+                    (subTreeRoot->left->data == secondElem))
+                     return subTreeRoot->data;
+
+
+                 return sameParent(subTreeRoot->left, firstElem, secondElem);
+        } else {
+            /* dwete sa right memberi */
+            if ((subTreeRoot->right->data == firstElem) ||
+                (subTreeRoot->right->data == secondElem))
+                return subTreeRoot->data;
+
+                return sameParent(subTreeRoot->right, firstElem, secondElem);
+        }
+    }
+
+    void getPath(Node<T>* subTreeRoot, const T element, vector<T>& path) const {
+        path.push_back(subTreeRoot->data);
+        if (subTreeRoot->data == element) {
+            return;
+        }
+        if (member(subTreeRoot->left, element)) {
+            getPath(subTreeRoot->left, element, path);
+            return;
+        }
+        if (member(subTreeRoot->right, element)) {
+            getPath(subTreeRoot->right, element, path);
+            return;
+        }
+    }
+
     public:
 
     BSTree()  {
@@ -172,6 +267,7 @@ class BSTree {
         return isomorphicTo(root, other.getRoot());
     }
 
+
     void serializeSorted(ofstream& out) {
         serializeSorted(root, out);
     }
@@ -179,6 +275,10 @@ class BSTree {
 
     void serializeInBinary(ofstream &out) {
         serializeInBinary(root, out);
+    }
+
+    bool member (const T& element) const {
+        return member(root, element);
     }
 
     void deserializeFromStream(ifstream& in) {
@@ -256,6 +356,31 @@ class BSTree {
         return minElem(root);
     }
 
+    vector<vector<T>> allPaths() {
+        vector<vector<T>> result;
+        vector<T> curr;
+        findAllPaths(root, curr, result);
+        return result;
+    }
+
+    bool isBalanced() const {
+        return isBalanced(root);
+    }
+
+    T sameParent(T firstElem, T secondElem) {
+        assert(member(firstElem) && member(secondElem));
+        return sameParent(root, firstElem, secondElem);
+    }
+
+    vector<T> getPath(const T element) {
+        vector<T> result;
+        getPath(root, element, result);
+        return result;
+    }
+
+    int size() const {
+        return size(root);
+    }
     ~BSTree() {
         deleteTree(root);
     }
@@ -355,6 +480,20 @@ void testSerializeSorted() {
 
 }
 
+void testMember() {
+    BSTree<int> tree;
+    tree.add(1);
+    tree.add(2);
+    tree.add(3);
+    tree.add(4);
+    assert(tree.member(1));
+    assert(tree.member(2));
+    assert(tree.member(3));
+    assert(tree.member(4));
+    assert(!tree.member(5));
+
+}
+
 void testIsomorphic() {
     BSTree<int> first;
     BSTree<char> second;
@@ -369,12 +508,93 @@ void testIsomorphic() {
     assert(first.isomorphicTo(second));
 }
 
+void testAllPaths() {
+    BSTree<int> tree;
+    tree.add(1);
+    tree.add(-1);
+    tree.add(2);
+    tree.add(3);
+
+    vector<vector<int>> result = tree.allPaths();
+
+    for (int i = 0; i < result.size(); i++) {
+        for (int j = 0; j < result[i].size(); j++) {
+            cout << result[i][j] << " ";
+        }
+        cout << endl;
+    }
+}
+
+void testSize() {
+    BSTree<int> tree;
+    tree.add(1);
+    tree.add(1);
+    tree.add(1);
+    tree.add(1);
+    assert(tree.size() == 4);
+
+}
+
+void sameParent() {
+    BSTree<int> tree;
+    tree.add(5);
+    tree.add(6);
+    tree.add(2);
+    tree.add (1);
+    tree.add(3);
+    assert(tree.sameParent(1,3) == 2);
+}
+
+void testPath() {
+    BSTree<int> tree;
+    tree.add(5);
+    tree.add(-1);
+    tree.add(6);
+    tree.add(2);
+    tree.add(3);
+
+    vector<int> path = tree.getPath(3);
+    assert(path.size() == 4);
+    assert(path[0] = 5);
+    assert(path[1] = -1);
+    assert(path[2] = 2);
+    assert(path[3] = 3);
+}
+
+void testBalancedTree() {
+    BSTree<int> tree;
+    tree.add(10);
+    tree.add(11);
+    tree.add(9);
+    assert(tree.isBalanced());
+
+    tree.add(8);
+    tree.add(7);
+    tree.add(6);
+    assert(!tree.isBalanced());
+
+    BSTree<int> tree2;
+    tree2.add(5);
+    tree2.add(3);
+    tree2.add(4);
+    tree2.add(20);
+    tree2.add(17);
+    tree2.add(18);
+
+    assert(!tree2.isBalanced());
+}
 int main() {
+    testMember();
     testMax();
     testMin();
     testRemove();
     testLevel();
     testSerializeSorted();
     testIsomorphic();
+    testAllPaths();
+    testSize();
+    testBalancedTree();
+    sameParent() ;
+    testPath();
     return 0;
 }

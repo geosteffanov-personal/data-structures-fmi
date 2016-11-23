@@ -47,6 +47,19 @@ public:
 		void unwind ();
     };
 
+    class HierarchicalIterator {
+    public:
+        HierarchicalIterator (Node *& root);
+        T operator * () const;
+        T& operator *();
+        HierarchicalIterator goLeft();
+        HierarchicalIterator goRight();
+
+        bool empty();
+    private:
+        Node *currentSubtree;
+    };
+
 private:
     Node* root;
     void deleteAll(Node *subtreeRoot);
@@ -72,7 +85,50 @@ public:
 
     T minelement ()const;
     bool member(const T& value) const;
+
+    HierarchicalIterator rootIter();
 };
+
+template <class T>
+BSTree<T>::HierarchicalIterator::HierarchicalIterator (Node *&root) : currentSubtree(root) {}
+template <class T>
+T BSTree<T>::HierarchicalIterator::operator *() const {
+    assert(currentSubtree!=nullptr);
+    return currentSubtree->data;
+}
+
+template <class T>
+T& BSTree<T>::HierarchicalIterator::operator *() {
+    if (currentSubtree == nullptr)
+        currentSubtree = new Node(T(), nullptr, nullptr);
+    return currentSubtree->data;
+}
+
+template <class T>
+typename BSTree<T>::HierarchicalIterator BSTree<T>::HierarchicalIterator::goLeft() {
+    assert(currentSubtree!=nullptr);
+    return currentSubtree->left;
+}
+
+template <class T>
+typename BSTree<T>::HierarchicalIterator BSTree<T>::HierarchicalIterator::goRight() {
+    assert(currentSubtree!=nullptr);
+    return currentSubtree->right;
+}
+
+template <class T>
+bool BSTree<T>::HierarchicalIterator::empty() {
+    return currentSubtree==nullptr;
+}
+
+template <class T>
+typename BSTree<T>::HierarchicalIterator BSTree<T>::rootIter()
+{
+	return typename BSTree<T>::HierarchicalIterator(root);
+}
+
+
+
 
 template <class T>
 BSTree<T>::Node::Node (const T& d,BSTree<T>::Node *l, BSTree<T>::Node *r)
