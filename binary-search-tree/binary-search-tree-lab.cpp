@@ -4,12 +4,6 @@
 #include <queue>
 #include <cmath>
 #include <vector>
-            /* dali edno darvo ima pat ot koren do listo, koito
-               u4astwa kato pat koren listo v drugo no v obraten
-               red
-            */
-
-            /* dali dadeni niva v dwe darveta */
 
 using namespace std;
 template <typename T>
@@ -247,6 +241,26 @@ class BSTree {
         }
     }
 
+    void allLevels(Node<T>* subTreeRoot, int height, vector<vector<T>>& result) {
+        if (subTreeRoot == NULL) {
+            return;
+        }
+
+        if (result.size() < height) {
+            vector<T> thisLevel;
+            thisLevel.push_back(subTreeRoot->data);
+            result.push_back(thisLevel);
+        } else {
+            result[height - 1].push_back(subTreeRoot->data);
+        }
+
+        allLevels(subTreeRoot->left, height + 1, result);
+        allLevels(subTreeRoot->right, height + 1, result);
+    }
+
+
+
+
     public:
 
     BSTree()  {
@@ -383,6 +397,13 @@ class BSTree {
     }
     ~BSTree() {
         deleteTree(root);
+    }
+
+    vector<vector<T>> allLevels() {
+        vector<vector<T>> result;
+        allLevels(root, 1, result);
+
+        return result;
     }
 };
 
@@ -583,6 +604,26 @@ void testBalancedTree() {
 
     assert(!tree2.isBalanced());
 }
+
+void testAllLevels() {
+    BSTree<int> tree;
+    tree.add(5);
+    tree.add(3);
+    tree.add(4);
+    tree.add(20);
+    tree.add(17);
+    tree.add(18);
+
+    vector<vector<int>> result = tree.allLevels();
+
+    for (int i = 0; i < result.size(); i++) {
+        for (int j = 0; j < result[i].size(); j++) {
+            cout << " " << result[i][j];
+        }
+        cout << "\n";
+    }
+
+}
 int main() {
     testMember();
     testMax();
@@ -596,5 +637,6 @@ int main() {
     testBalancedTree();
     sameParent() ;
     testPath();
+    testAllLevels();
     return 0;
 }

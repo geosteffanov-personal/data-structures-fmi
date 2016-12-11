@@ -3,17 +3,18 @@
 using namespace std;
 
 template <class T>
-struct Node {
-    T data;
-    Node<T>* next;
-
-    Node(T _data): data(_data), next(NULL) {}
-
-    Node(T _data, Node<T>* _next) : data(_data), next(_next) {}
-};
-
-template <class T>
 class Stack {
+    struct Node {
+        T data;
+        Node<T>* next;
+
+        Node(T _data): data(_data), next(NULL) {}
+
+        Node(T _data, Node<T>* _next) : data(_data), next(_next) {}
+    };
+
+
+
     Node<T>* top;
 
     Node<T>* copyStack(Node<T>* nextNode) {

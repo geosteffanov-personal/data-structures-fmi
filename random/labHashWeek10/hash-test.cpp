@@ -2,7 +2,7 @@
 #include <iostream>
 #include "hash.cpp"
 #include <assert.h>
-unsigned int hashFunction(int key, unsigned int size) {
+unsigned int hashFunction(unsigned long int firstKey, unsigned long int secondKey, unsigned int size) {
     return key % size;
 }
 void testAddAssign() {

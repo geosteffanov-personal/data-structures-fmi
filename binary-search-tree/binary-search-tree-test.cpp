@@ -1,6 +1,7 @@
 #include <iostream>
 #include <assert.h>
 #include <stack>
+#include <iomanip>
 
 #include "binary-search-tree.cpp"
 
@@ -89,6 +90,32 @@ void testIterator ()
 
 
 	 assert (count == 6);
+
+}
+
+template <class T>
+void prettyPrint (typename BSTree<T>::HierarchicalIterator it,int depth=0)
+{
+	if (it.empty())
+		return;
+
+	prettyPrint<T> (it.goLeft(), depth + 1);
+
+	cout << setw (depth*4) << " " << *it << endl;
+
+	prettyPrint<T> (it.goRight(), depth + 1);
+}
+
+void testMakeTree ()
+{
+	BSTree<int> t;
+	typename BSTree<int>::HierarchicalIterator it = t.rootIter();
+
+	*it = 10;
+	*it.goLeft() = 12;
+	*it.goRight() = 14;
+
+	prettyPrint<int> (it);
 
 }
 

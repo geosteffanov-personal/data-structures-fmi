@@ -7,7 +7,8 @@ using namespace std;
 template <class KEY>
 using hashFn  = unsigned int (*) (KEY, unsigned int);
 
-template <class KEY, class VALUE>
+
+template <class KEY, c  lass VALUE>
 class Hash {
     struct Pair {
         KEY key;
@@ -46,8 +47,6 @@ public:
         return out;
     }
 };
-
-
 /* implementations */
 
 template <class KEY, class VALUE>

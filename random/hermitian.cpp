@@ -5,7 +5,7 @@ using namespace std;
 
 #define HERMITIAN 0
 #define MULT 1
-#define ADD 2
+#define SUBT 2
 #define VALUE 3
 
 struct Frame {
@@ -24,7 +24,7 @@ public:
             return 2*x;
         double a = 2*x*recursiveHermitian(x, n -1);
         double b = 2*(n-1)*recursiveHermitian(x, n-2);
-        return a + b;
+        return a - b;
     }
 
     double stackHermitian (double x, double n) {
@@ -77,11 +77,11 @@ public:
                     Frame hermitianLeft;
                     Frame hermitianRight;
                     Frame mult;
-                    Frame plus;
+                    Frame subt;
                     Frame doubleX;
                     Frame doubleN1;
 
-                    plus.opCode = ADD;
+                    subt.opCode = SUBT;
                     mult.opCode = MULT;
 
                     hermitianLeft.opCode = HERMITIAN;
@@ -96,7 +96,7 @@ public:
                     doubleN1.opCode = VALUE;
                     doubleN1.value = 2 * (n - 1);
 
-                    opStack.push(plus);
+                    opStack.push(subt);
                     opStack.push(mult);
                     opStack.push(doubleN1);
                     opStack.push(hermitianRight);
@@ -118,7 +118,7 @@ public:
                  opStack.push(result);
                  break;
 
-            case ADD:
+            case SUBT:
                   first = helperStack.top();
                   helperStack.pop();
 
@@ -126,7 +126,7 @@ public:
                   helperStack.pop();
 
                   result.opCode = VALUE;
-                  result.value = first.value + second.value;
+                  result.value = second.value - first.value;
 
                   opStack.push(result);
                   break;
@@ -142,14 +142,12 @@ public:
             }
         }
     }
-
-
 };
 
 void testHermitian() {
     HermitianPolynomial c;
-    for (int i = 0; i < 15; i++) {
-        assert(c.recursiveHermitian(3, i) == c.stackHermitian(3, i));
+    for (int i = 0 ; i < 10; i++) {
+        assert(c.stackHermitian(3, i) == c.recursiveHermitian(3, i));
     }
 }
 

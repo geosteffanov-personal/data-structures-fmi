@@ -7,8 +7,14 @@
 
 using namespace std;
 
+
 template <class T>
 using mapFn = T (*)(const T&);
+
+int plusOne (const int& i)
+{
+	return i + 1;
+}
 
 template <class T>
 struct Node
@@ -30,7 +36,6 @@ struct Node
 	{
 		return id;
 	}
-
 private:
 	int id;
 
@@ -56,7 +61,7 @@ private:
 	void map (mapFn<T>,Node<T> *subTreeRoot);
 
 	void dottyPrint (Node<T> *subTreeRoot,ostream& out) const;
-
+    Node<T>* deletedBOT(Node<T>* subTreeRoot, const T& x) const;
 	void serialize (Node<T>*, ostream&) const;
 
 	void serializeScheme (Node<T>*,  ostream&) const;
@@ -80,9 +85,28 @@ private:
 
 
 
+	static Node<T>* copyTree (const Node<T> *subTreeRoot);
+
+	void insertBOT (Node<T>*&subTreeRoot,const T& x);
+
+	Node<T>* insertedBOT (Node<T>*subTreeRoot, const T& x);
+
+	void deleteElement (Node<T> *&subTreeRoot, const T&x);
+
+	T minelement (Node<T> *subTreeRoot) const;
+	T maxelement (Node<T>* subTreeRoot) const;
+
+	bool isBOT(Node<T>* subTreeRoot) const;
+
 public:
 	BTree();
+	BTree (const BTree<T> &other);
+
+	BTree<T>& operator = (const BTree<T> &other);
+
 	BTree<T>& add (const T& data, const char *trace);
+
+	void deleteElement (const T&x);
 
 	void deserialize (istream&);
 
@@ -92,7 +116,7 @@ public:
 	void dottyPrint (ostream&);
 	//bool isEmpty();
 	bool member (const T&) const;
-	
+
 	vector<T> listLeaves() const;
 
 	string findTrace(const T& element) const;
@@ -102,6 +126,7 @@ public:
 	void map (mapFn<T>);
 
 	void serialize (ostream&)const;
+
 
 	void serializeScheme (ostream&) const;
 
@@ -113,9 +138,324 @@ public:
 
 	vector<T> level(int k) const;
 
+	BTree<T>& insertBOT (const T& x);
+
+	BTree<T> insertedBOT (const T& x);
+
+	T minelement ()const;
+
+    BTree<T> deletedBOT(const T& x) const;
+
 	~BTree();
 
+	bool hasSameLevels() const;
+
+	T maxelement() const;
+	bool isBOT() const;
+
 };
+
+template<class T>
+void BTree<T>::deleteElement (Node<T> *&subTreeRoot, const T&x)
+{
+	//триене от празно дърво
+	if (subTreeRoot==NULL)
+		return;
+
+	//триене от листо
+	if (subTreeRoot->data == x &&
+		subTreeRoot->left == NULL &&
+		subTreeRoot->right == NULL)
+
+	{
+		delete subTreeRoot;
+		subTreeRoot = NULL;
+		return;
+	}
+
+	//триене от лявото поддърво
+	if (x < subTreeRoot->data)
+	{
+		deleteElement (subTreeRoot->left,x);
+		return;
+	}
+
+	//триене от дясното поддърво
+	if (x > subTreeRoot->data)
+	{
+		deleteElement (subTreeRoot->right,x);
+		return;
+	}
+
+	//вече сме сигурни, че трием корена!
+	//освен това сме сигурни, че корена има ПОНЕ ЕДИН
+	//наследник
+
+	//триене на корен само с 1 наследник
+	if (subTreeRoot->right == NULL)
+	{
+		Node<T> *tmp = subTreeRoot;
+		subTreeRoot = subTreeRoot->left;
+		delete tmp;
+		return;
+	}
+
+	//триене на корен само с 1 наследник
+	//този случй може да не се разглежда
+	if (subTreeRoot->left == NULL)
+	{
+		Node<T> *tmp = subTreeRoot;
+		subTreeRoot = subTreeRoot->right;
+		delete tmp;
+		return;
+	}
+
+
+	//триене на корена
+	//вече сме сигурни, че корена има точно два наследника
+	T minel = minelement(subTreeRoot->right);
+	subTreeRoot->data = minel;
+	deleteElement (subTreeRoot->right, minel);
+
+
+}
+
+template<class T>
+void BTree<T>::deleteElement (const T&x)
+{
+	deleteElement (root,x);
+}
+
+template<class T>
+T BTree<T>::minelement (Node<T> *subTreeRoot) const
+{
+	assert (subTreeRoot != NULL);
+	Node<T> *current = subTreeRoot;
+
+	while (current->left != NULL)
+	{
+		current = current->left;
+	}
+
+	return current->data;
+
+}
+
+
+template<class T>
+T BTree<T>::minelement () const
+{
+	return minelement (root);
+
+}
+template <class T>
+bool BTree<T>::hasSameLevels() const {
+ for (int i = 0; i < height(); i++) {
+        for (int j = 0; j < height(); j++) {
+            vector<T> firstComparand = level(i);
+            vector<T> secondComparand = level(j);
+            bool isSubset = true;
+            bool isSuperset = true;
+            for (int k = 0; k < firstComparand.size(); k++) {
+                bool isContained = false;
+                for (int l = 0; l < secondComparand.size(); l++) {
+                    if (firstComparand[k] == secondComparand[l]) {
+                        isContained = true;
+                    }
+                    if (isContained)
+                        break;
+                }
+                if (!isContained)
+                    return false;
+
+            }
+            for (int l = 0; l < secondComparand.size(); l++) {
+                bool isContained = false;
+                for (int k = 0; k < firstComparand.size(); k++) {
+                    if (secondComparand[l] == firstComparand[k]) {
+                        isContained = true;
+                    }
+                    if (isContained)
+                        break;
+                }
+                if (!isContained)
+                    return false;
+            }
+            return true;
+        }
+	 }
+}
+
+template<class T>
+BTree<T> BTree<T>::insertedBOT (const T& x)
+{
+	BTree<T> result;
+	result.root = insertedBOT (root,x);
+
+	return result;
+}
+template <class T>
+T BTree<T>::maxelement () const {
+    return maxelement(root);
+}
+
+template <class T>
+T BTree<T>::maxelement (Node<T> *subTreeRoot) const
+{
+	assert (subTreeRoot != NULL);
+	Node<T> *current = subTreeRoot;
+
+	while (current->right != NULL)
+	{
+		current = current->right;
+	}
+	return current->data;
+}
+
+
+template <class T>
+bool BTree<T>::isBOT() const {
+    return isBOT(root);
+}
+
+template <class T>
+bool BTree<T>::isBOT(Node<T>* subTreeRoot) const {
+  if (subTreeRoot == NULL) {
+    return true;
+  }
+  if (subTreeRoot->left == NULL && subTreeRoot->right == NULL) {
+    return true;
+  }
+  if (subTreeRoot->left == NULL) {
+    return (subTreeRoot->data < minelement(subTreeRoot->right)) &&
+            isBOT(subTreeRoot->right);
+  }
+
+  if (subTreeRoot->right == NULL) {
+        return (subTreeRoot->data >= maxelement(subTreeRoot->right)) &&
+                isBOT(subTreeRoot->left);
+  }
+
+    return (subTreeRoot->data < minelement(subTreeRoot->right)) &&
+           (subTreeRoot->data >= maxelement(subTreeRoot->left)) &&
+           isBOT(subTreeRoot->left) && isBOT(subTreeRoot->right);
+}
+
+template<class T>
+BTree<T> BTree<T>::deletedBOT (const T& x) const {
+    BTree<T> result;
+    result.root = deletedBOT (root, x);
+
+    return result;
+
+}
+template <class T>
+Node<T>* BTree<T>::deletedBOT (Node<T>* subTreeRoot, const T& x) const {
+    if (subTreeRoot == NULL) {
+        return NULL;
+    } /* не сме намерили съответния елемент */
+    if (subTreeRoot->data == x)  { // опа това трябва да се трие!!
+        if (subTreeRoot->left == NULL && subTreeRoot-> right == NULL) {
+            return NULL;
+        }
+        if (subTreeRoot->right != NULL) {
+                // right is not null
+                T minel = minelement(subTreeRoot->right);
+                return new Node<T> (minel, deletedBOT(subTreeRoot->left, minel), deletedBOT(subTreeRoot->right, minel));
+        } else { // right is null left is not
+            return deletedBOT(subTreeRoot->left, x + 1);
+        }
+    } else if (x < subTreeRoot->data) {
+        return new Node<T> (subTreeRoot->data, deletedBOT(subTreeRoot->left, x),
+                        deletedBOT(subTreeRoot->right, x));
+    } else {
+        return new Node<T> (subTreeRoot->data, deletedBOT(subTreeRoot->left, x),
+                        deletedBOT(subTreeRoot->right, x));
+    }
+
+}
+template<class T>
+Node<T>* BTree<T>::insertedBOT (Node<T>*subTreeRoot, const T& x)
+{
+	if (subTreeRoot == NULL)
+	{
+		return new Node<T> (x,NULL,NULL);
+	}
+
+	if (x > subTreeRoot->data)
+	{
+		return new Node<T> (subTreeRoot->data,
+							copyTree(subTreeRoot->left),
+							insertedBOT(subTreeRoot->right,x));
+
+	}
+
+	return new Node<T> (subTreeRoot->data,
+						insertedBOT(subTreeRoot->left,x),
+						copyTree(subTreeRoot->right));
+
+}
+
+
+
+
+template<class T>
+void BTree<T>::insertBOT (Node<T>* &subTreeRoot,const T& x)
+{
+
+	if (subTreeRoot == NULL)
+	{
+		subTreeRoot = new Node<T> (x,NULL,NULL);
+		return;
+	}
+
+	if (x <= subTreeRoot->data)
+	{
+		insertBOT (subTreeRoot->left,x);
+	} else {
+		insertBOT (subTreeRoot->right,x);
+	}
+
+}
+
+
+template<class T>
+BTree<T>& BTree<T>::insertBOT (const T& x)
+{
+	insertBOT (root,x);
+	return *this;
+}
+
+template<class T>
+BTree<T>& BTree<T>::operator = (const BTree<T> &other)
+{
+	if (this == &other)
+		return *this;
+
+	deleteAll (root);
+	root = copyTree (other.root);
+
+	return *this;
+}
+
+
+template<class T>
+Node<T>* BTree<T>::copyTree (const Node<T> *subTreeRoot)
+{
+	if (subTreeRoot == NULL)
+		return NULL;
+
+	return new Node<T> (subTreeRoot->data,
+		                copyTree(subTreeRoot->left),
+		                copyTree(subTreeRoot->right));
+}
+
+template<class T>
+BTree<T>::BTree (const BTree<T> &other)
+{
+	root = copyTree (other.root);
+}
+
 
 template<class T>
 void BTree<T>::serialize (Node<T> *subTreeRoot, ostream &out) const
@@ -170,6 +510,8 @@ void BTree<T>::deserializeScheme(istream &in) {
 	deleteAll(root);
 
 	root = parseSchemeTree(in);
+
+	prettyPrint();
 }
 
 
@@ -179,7 +521,7 @@ void BTree<T>::dottyPrint (ostream &out)
 {
 	out << "digraph G {" << endl;
 	dottyPrint (root, out);
-	out << "}" << endl;	
+	out << "}" << endl;
 }
 
 
@@ -190,19 +532,19 @@ void BTree<T>::dottyPrint (Node<T> *subTreeRoot,ostream& out) const
 	if (subTreeRoot == NULL)
 		return;
 
-	out << subTreeRoot->getID() 
-	    << "[label=\"" 
-	    << subTreeRoot->data 
+	out << subTreeRoot->getID()
+	    << "[label=\""
+	    << subTreeRoot->data
 	    << "\"];" << endl;
 
 	if (subTreeRoot->left != NULL)
-		out << subTreeRoot->getID() 
+		out << subTreeRoot->getID()
 	        <<"->"
 	        << subTreeRoot->left->getID()
 	        << endl;
 
 	if (subTreeRoot->right != NULL)
-		out << subTreeRoot->getID() 
+		out << subTreeRoot->getID()
 	        <<"->"
 	        << subTreeRoot->right->getID()
 	        << endl;
@@ -268,6 +610,7 @@ template <class T>
 BTree<T>::~BTree()
 {
 	deleteAll (root);
+	root = NULL;
 
 }
 
@@ -318,8 +661,8 @@ void BTree<T>::simplePrint(Node<T> *subTreeRoot) const
 	if (subTreeRoot == NULL)
 		return;
 
-	cout << subTreeRoot->data << " ";
 	simplePrint (subTreeRoot->left);
+	cout << subTreeRoot->data << " ";
 	simplePrint (subTreeRoot->right);
 }
 
@@ -332,7 +675,7 @@ void removeWhite (istream &in)
 template <class T>
 Node<T>* BTree<T>::parseTree (istream &in)
 {
-	
+
 	removeWhite (in);
 
 	if (in.peek() == 'n')
@@ -358,14 +701,22 @@ template <class T>
 Node<T>* BTree<T>::parseSchemeTree (istream &in)
 {
 	removeWhite(in);
+	cout << "!" << endl;
 	if (in.peek() == '(') {
 		in.get();
-		if (in.peek() == ')')
-			return NULL;
+		if (in.peek() == ')') {
+            in.get();
+            cout << "EMPTY TREE";
+            return NULL;
+		}
 		T data;
 		in >> data;
+		cout << "DATA: " << data <<endl;
+		Node<T>* result =  new Node<T> (data, parseSchemeTree(in), parseSchemeTree(in));
 		removeWhite(in);
-		return new Node<T> (data, parseSchemeTree(in), parseSchemeTree(in));
+		if (in.peek() == ')')
+            in.get();
+        return result;
 	}
 
 }
@@ -385,19 +736,26 @@ template <class T>
 void BTree<T>::listLeaves(Node<T> *subTreeRoot, vector<T> &resultVector) const {
 	if (subTreeRoot ==  NULL)
 		return;
-	bool alreadyExists = false;
+
+	if (subTreeRoot->left != NULL || subTreeRoot->right != NULL) {
+        listLeaves(subTreeRoot->left, resultVector);
+        listLeaves(subTreeRoot->right, resultVector);
+        return;
+	}
+
+    bool alreadyExists = false;
 	for (int i = 0; i < resultVector.size(); i++) {
 		if(resultVector[i] == subTreeRoot->data) {
 			alreadyExists = true;
 			break;
 		}
 	}
+
 	if (!alreadyExists)  {
-		resultVector.push_back(subTreeRoot->data);	
+		resultVector.push_back(subTreeRoot->data);
+		return;
 	}
-	
-	listLeaves(subTreeRoot->left, resultVector);
-	listLeaves(subTreeRoot->right, resultVector);
+
 }
 
 template <class T>
@@ -413,7 +771,7 @@ string BTree<T>::findTrace(Node<T> *subTreeRoot, string resultString, const T& e
 	if(subTreeRoot == NULL) {
 		return "_";
 	}
-	
+
 	if(subTreeRoot->data == element) {
 		return resultString;
 	}
@@ -430,12 +788,12 @@ string BTree<T>::findTrace(Node<T> *subTreeRoot, string resultString, const T& e
 
 	if (resultLeft !=  "_") return resultLeft;
 	if (resultRight != "_") return resultRight;
-	
+
 	return "_";
 }
 
 template <class T>
-string BTree<T>::findTrace(const T& element) const 
+string BTree<T>::findTrace(const T& element) const
 {
 	return findTrace(root, "", element);
 }
@@ -449,7 +807,7 @@ void BTree<T>::prettyPrint(Node<T>* subTreeRoot, int height) const
 	}
 
 	prettyPrint(subTreeRoot->right, height + 1);
-	
+
 	for (int i = 0; i <= height; i++) {
 		cout << "   ";
 	}
@@ -515,12 +873,11 @@ T& BTree<T>::operator[](const int i) const
 }
 
 template <class T>
-void BTree<T>::findValue(Node<T>* subTreeRoot, const int index, int &current, T*& valueHolder) const 
+void BTree<T>::findValue(Node<T>* subTreeRoot, const int index, int &current, T*& valueHolder) const
 {
 	if (subTreeRoot == NULL) {
 		return;
 	}
-	cout << "DATA:" << subTreeRoot->data << endl;
 	current++;
 	if (index == current) {
 		valueHolder = &subTreeRoot->data;
@@ -535,14 +892,19 @@ void BTree<T>::findValue(Node<T>* subTreeRoot, const int index, int &current, T*
 		return;
 }
 
-
 template <class T>
 void BTree<T>::findAtLevel(Node<T>* subTreeRoot, int crrLevel, const int level, vector<T> &resultHolder) const {
 	if (subTreeRoot == NULL)
 		return;
 	crrLevel++;
 	if (crrLevel == level) {
-		resultHolder.push_back(subTreeRoot->data);
+        bool contains = false;
+        for (int i = 0; i < resultHolder.size(); i++) {
+            if(resultHolder[i] == subTreeRoot->data)
+                contains = true;
+        }
+		if(!contains)
+            resultHolder.push_back(subTreeRoot->data);
 		return;
 	}
 	findAtLevel(subTreeRoot->left, crrLevel, level, resultHolder);
@@ -563,7 +925,7 @@ void testMember ()
 {
 	BTree<int> t;
 
-	t.add(10,"").add(12,"L").add(14,"R").add(15,"LR");	
+	t.add(10,"").add(12,"L").add(14,"R").add(15,"LR");
 
 	assert (t.member(12) == true);
 	assert (t.member(18) == false);
@@ -577,9 +939,11 @@ void testListLeaves ()
 	BTree<int> t;
 	t.add(10,"").add(12,"L").add(14,"R").add(15,"LR").add(14, "LL").add(12, "RL");
 	vector<int> resultVector = t.listLeaves();
-	for (int i = 0; i < resultVector.size(); i++) {
-		cout << resultVector[i] << endl;
-	}
+    vector<int> testVector;
+    testVector.push_back(14);
+    testVector.push_back(15);
+    testVector.push_back(12);
+    assert(testVector == resultVector);
 }
 
 
@@ -588,7 +952,7 @@ void testFindTrace ()
 	cout << "Testing 'findTrace'" << endl;
 	BTree<int> t;
 	t.add(10,"").add(12,"L").add(14,"R").add(15,"LR").add(14, "LL").add(12, "RL");
-	cout << t.findTrace(15) << endl;
+	assert(t.findTrace(15)== "LR");
 }
 
 void testPrettyPrint()
@@ -599,11 +963,45 @@ void testPrettyPrint()
 	t.prettyPrint();
 }
 
+void testAssignment()
+{
+	BTree<int> t;
+
+	t.add(10,"").add(12,"L").add(14,"R").add(15,"LR");
+
+	BTree<int> t1 = t;
+
+	t1.map (plusOne);
+
+	t1 = t;
+
+	assert (t1.member(10) &&
+		    t1.member (12) &&
+		    t1.member (14) &&
+		    t1.member (15));
+    assert(t1.size() == 4);
+
+}
+
+void testMinEl ()
+{
+	BTree<int> t;
+
+	t.insertBOT(59)
+	 .insertBOT(23)
+	 .insertBOT(68)
+	 .insertBOT(190)
+	 .insertBOT(41)
+	 .insertBOT(67);
+
+	 assert (t.minelement() == 23);
+}
+
 void testIndexOperator() {
 	cout << "Testing operator [] " << endl;
 	BTree<int> t;
 	t.add(10,"").add(12,"L").add(14,"R").add(15,"LR").add(14, "LL").add(12, "RL").add(17, "RLL");
-	cout << t[6] << endl;
+	assert(t[6] == 17);
 }
 
 void testSize()
@@ -611,11 +1009,10 @@ void testSize()
 	cout << "Testing 'size()' " << endl;
 	BTree<int> t;
 	t.add(10,"").add(12,"L").add(14,"R").add(15,"LR").add(14, "LL").add(12, "RL").add(17, "RLL");
-	cout  << "size - " << t.size() << endl;
+	assert(t.size() == 7);
 }
 
 void testSerializeScheme() {
-
 	cout << "Testing 'serializeScheme' " << endl;
 	BTree<int> t;
 	t.add(10,"").add(12,"L").add(14,"R").add(15,"LR");
@@ -625,11 +1022,7 @@ void testSerializeScheme() {
 void testDeserializeScheme() {
 	BTree<int> test;
 	ifstream in ("data.txt");
-
 	test.deserializeScheme (in);
-	cout << "---DESERIALIZED TREE-------" << endl;
-	test.serializeScheme(cout);
-
 }
 
 void testLevel() {
@@ -637,51 +1030,100 @@ void testLevel() {
 	BTree<int> test;
 	test.add(10,"").add(12,"L").add(14,"R").add(15,"LR");
 	vector<int> result = test.level(1);
-	for (int i = 0; i < result.size(); i++) {
-		cout << result[i] << endl;
-	}
+    vector<int> compare;
+    compare.push_back(12);
+    compare.push_back(14);
+    assert(compare == result);
 }
 
 void testHeight() {
 	cout << "Testing 'height()' " << endl;
 	BTree<int> test;
 	test.add(10,"").add(12,"L").add(14,"R").add(15,"LR");
-	cout << test.height() << endl;
+	assert(test.height() == 3);
 }
 
-int plusOne (const int& i)
-{
-	return i + 1;
+void testDeletedBOT() {
+    BTree<int> t;
+
+	t.insertBOT(59)
+	 .insertBOT(23)
+	 .insertBOT(68)
+	 .insertBOT(190)
+	 .insertBOT(41)
+	 .insertBOT(67);
+
+	 BTree<int> result = t.deletedBOT(41);
+	 assert(result.member(59) && result.member(23) && result.member(68) && result.member(190) && result.member(67));
+	 assert(result.size() == 5);
+     assert(result.member(41) == false);
+
+     result = t.deletedBOT(59);
+	 assert(result.member(41) && result.member(23) && result.member(68) && result.member(190) && result.member(67));
+	 assert(result.size() == 5);
+     assert(result.member(59) == false);
+
+     result = t.deletedBOT(190);
+	 assert(result.member(59) && result.member(23) && result.member(68) && result.member(41) && result.member(67));
+     assert(result.size() == 5);
+     assert(result.member(190) == false);
+
 }
 
+void testSameLevels() {
+    BTree<int> test;
+    test.add(5, "");
+    test.add(5, "L");
+    test.add(3, "R");
+    test.add(5, "LL");
+    test.add(3, "RL");
+    test.add(3, "LR");
 
+    test.prettyPrint();
+
+    cout << test.hasSameLevels();
+
+}
+
+void testIsBOT() {
+    BTree<int> t;
+
+	t.insertBOT(59)
+	 .insertBOT(23)
+	 .insertBOT(68)
+	 .insertBOT(190)
+     .insertBOT(41)
+	 .insertBOT(67);
+
+	 assert (t.isBOT());
+
+	 BTree<int> s;
+	 s.add(5, "");
+	 s.add(4,"R");
+
+	 assert(!s.isBOT());
+
+}
 
 int main ()
 {
-	
-	// testMember ();
-
-	// BTree<int> t;
-
-	// t.add(10,"").add(12,"L").add(14,"R").add(15,"LR");
-	// t.simplePrint();
-
-	// t.map (plusOne);
-
-
-	// t.simplePrint ();
-	// //t.dottyPrint (cerr);
-
-	// cout << "------------" << endl;
-	// t.serialize (cout);
-	// test.dottyPrint (cerr);
-	// testListLeaves();
-	// testFindTrace();
-	// testPrettyPrint();
-	// testIndexOperator();
-	// testSerializeScheme();
-	// testHeight();
+    //assert(false);
+    ///*
+    testHeight();
 	testLevel();
-
+	testSize();
+	testAssignment();
+	testMember();
+	testDeserializeScheme();
+	testSerializeScheme();
+	testIndexOperator();
+	testMinEl();
+	testPrettyPrint();
+	testFindTrace();
+	testListLeaves();
+    testDeletedBOT();
+    testSameLevels();
+    testIsBOT();
+	//*/
 	return 0;
 }
