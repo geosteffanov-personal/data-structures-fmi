@@ -1,4 +1,5 @@
 #include <iostream>
+#include <fstream>
 #include <assert.h>
 #include <sstream>
 #include <cstring>
@@ -19,11 +20,14 @@ class CyclicQueue {
     public:
 
     CyclicQueue();
-    void push(T data);
+    void push(T);
     T pop();
 
     string toString();
     bool empty();
+
+    void serialize(ofstream&);
+    void deserialize(ifstream& );
 };
 
 template <class T>
@@ -92,3 +96,34 @@ bool CyclicQueue<T>::empty() {
     return tail == nullptr;
 }
 
+
+template <class T>
+void CyclicQueue<T>::serialize(ofstream& out) {
+    if(tail == nullptr) {
+        return;
+    }
+    Node* tmp = tail->next;
+    while(tmp != tail) {
+        out << tmp->data;
+        out << endl;
+        tmp = tmp->next;
+    }
+    out << tmp->data;
+    out << endl;
+
+}
+
+template <class T>
+void CyclicQueue<T>::deserialize(ifstream& in) {
+    T data;
+    /*
+    while(!in.eof()) {
+        in >> data;
+        cout << data << endl;
+        push(data);
+    }
+    */
+    while(in >> data) {
+        push(data);
+    }
+}

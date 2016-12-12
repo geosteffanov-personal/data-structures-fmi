@@ -3,6 +3,7 @@
 #include <assert.h>
 #include <queue>
 #include <cmath>
+#include <cstring>
 #include <vector>
 
 using namespace std;
@@ -32,7 +33,7 @@ class BSTree {
 
             return;
         }
-        if (element <= subTreeRoot->data) {
+        if (element.compare(subTreeRoot->data)>= 0) {
             add(subTreeRoot->left, element);
             return;
         }
@@ -75,11 +76,11 @@ class BSTree {
             deleteElement(subTreeRoot->left, largestValue);
             return;
         }
-        if (value < subTreeRoot->data) {
+        if (strcmp(value, subTreeRoot->data) >= 0) {
             deleteElement(subTreeRoot->left, value);
             return;
         }
-        if (value > subTreeRoot->data) {
+        if (strcmp(value, subTreeRoot->data) >= 0) {
             deleteElement(subTreeRoot->right, value);
             return;
         }
@@ -159,7 +160,7 @@ class BSTree {
             return false;
         if (subTreeRoot->data == element)
             return true;
-        if (subTreeRoot->data >= element) {
+        if (strcmp(subTreeRoot->data, element) >= 0) {
             return member(subTreeRoot->left, element);
         }
         return member(subTreeRoot->right, element);
@@ -433,223 +434,246 @@ vector<T> BSTree<T>::level(int k) const {
 	return result;
 }
 
-void testAdd()  {
-    BSTree<int> tree;
-    tree.add(5).add(3).add(2).add(10).add(11)
-       .add(10).add(1).add(12).add(6);
-}
+//void testAdd()  {
+//    BSTree<int> tree;
+//    tree.add(5).add(3).add(2).add(10).add(11)
+//       .add(10).add(1).add(12).add(6);
+//}
+//
+//void testBFSPrint() {
+//        BSTree<int> tree;
+//        tree.add(5).add(3).add(2).add(10).add(11)
+//            .add(10).add(1).add(12).add(6);
+//        tree.printBFS();
+//}
+//
+//void testMin() {
+//       BSTree<int> tree;
+//        tree.add(5).add(3).add(2).add(10).add(11)
+//            .add(10).add(1).add(12).add(6);
+//
+//    assert(tree.minElem() == 1);
+//}
+//
+//void testMax() {
+//    BSTree<int> tree;
+//        tree.add(5).add(3).add(2).add(10).add(11)
+//            .add(10).add(1).add(12).add(6);
+//
+//    assert(tree.maxElem() == 12);
+//
+//}
+//
+//void testRemove() {
+//    BSTree<int> tree;
+//        tree.add(5).add(3).add(2).add(10).add(11)
+//            .add(10).add(1).add(12).add(6);
+//    tree.deleteElement(5);
+//    assert(tree.maxElem() == 12);
+//}
+//
+//void testLevel() {
+//        BSTree<int> tree;
+//        tree.add(5).add(3).add(2).add(10).add(11)
+//            .add(10).add(1).add(12).add(6);
+//
+//        vector<int> level = tree.level(1);
+//        vector<int> assertVect;
+//        assertVect.push_back(3);
+//        assertVect.push_back(10);
+//
+//        for (int i = 0; i < level.size(); i++) {
+//            assert(level[i] == assertVect[i]);
+//        }
+//
+//}
+//
+//void testSerializeSorted() {
+//    BSTree<int> tree;
+//
+//    ifstream binaryFileDeser;
+//    binaryFileDeser.open("bintree.bin", ios::binary );
+//    tree.deserializeFromStream(binaryFileDeser);
+//
+//    ofstream result;
+//    result.open("output.txt");
+//    tree.serializeSorted(result);
+//    result.close();
+//
+//}
+//
+//void testMember() {
+//    BSTree<int> tree;
+//    tree.add(1);
+//    tree.add(2);
+//    tree.add(3);
+//    tree.add(4);
+//    assert(tree.member(1));
+//    assert(tree.member(2));
+//    assert(tree.member(3));
+//    assert(tree.member(4));
+//    assert(!tree.member(5));
+//
+//}
+//
+//void testIsomorphic() {
+//    BSTree<int> first;
+//    BSTree<char> second;
+//    first.add(5);
+//    first.add(3);
+//    first.add(6);
+//
+//    second.add('b');
+//    second.add('a');
+//    second.add('c');
+//
+//    assert(first.isomorphicTo(second));
+//}
+//
+//void testAllPaths() {
+//    BSTree<int> tree;
+//    tree.add(1);
+//    tree.add(-1);
+//    tree.add(2);
+//    tree.add(3);
+//
+//    vector<vector<int>> result = tree.allPaths();
+//
+//    for (int i = 0; i < result.size(); i++) {
+//        for (int j = 0; j < result[i].size(); j++) {
+//            cout << result[i][j] << " ";
+//        }
+//        cout << endl;
+//    }
+//}
+//
+//void testSize() {
+//    BSTree<int> tree;
+//    tree.add(1);
+//    tree.add(1);
+//    tree.add(1);
+//    tree.add(1);
+//    assert(tree.size() == 4);
+//
+//}
+//
+//void sameParent() {
+//    BSTree<int> tree;
+//    tree.add(5);
+//    tree.add(6);
+//    tree.add(2);
+//    tree.add (1);
+//    tree.add(3);
+//    assert(tree.sameParent(1,3) == 2);
+//}
+//
+//void testPath() {
+//    BSTree<int> tree;
+//    tree.add(5);
+//    tree.add(-1);
+//    tree.add(6);
+//    tree.add(2);
+//    tree.add(3);
+//
+//    vector<int> path = tree.getPath(3);
+//    assert(path.size() == 4);
+//    assert(path[0] = 5);
+//    assert(path[1] = -1);
+//    assert(path[2] = 2);
+//    assert(path[3] = 3);
+//}
+//
+//void testBalancedTree() {
+//    BSTree<int> tree;
+//    tree.add(10);
+//    tree.add(11);
+//    tree.add(9);
+//    assert(tree.isBalanced());
+//
+//    tree.add(8);
+//    tree.add(7);
+//    tree.add(6);
+//    assert(!tree.isBalanced());
+//
+//    BSTree<int> tree2;
+//    tree2.add(5);
+//    tree2.add(3);
+//    tree2.add(4);
+//    tree2.add(20);
+//    tree2.add(17);
+//    tree2.add(18);
+//
+//    assert(!tree2.isBalanced());
+//}
+//
+//void testAllLevels() {
+//    BSTree<int> tree;
+//    tree.add(5);
+//    tree.add(3);
+//    tree.add(4);
+//    tree.add(20);
+//    tree.add(17);
+//    tree.add(18);
+//
+//    vector<vector<int>> result = tree.allLevels();
+//
+//    for (int i = 0; i < result.size(); i++) {
+//        for (int j = 0; j < result[i].size(); j++) {
+//            cout << " " << result[i][j];
+//        }
+//        cout << "\n";
+//    }
+//
+//}
+//
+bool checkTree() {
+   BSTree<string> tree;
+   tree.add("21");
+   tree.add("1"); tree.add("2");
+   tree.print();
+   cout << "\n\n";
 
-void testBFSPrint() {
-        BSTree<int> tree;
-        tree.add(5).add(3).add(2).add(10).add(11)
-            .add(10).add(1).add(12).add(6);
-        tree.printBFS();
-}
-
-void testMin() {
-       BSTree<int> tree;
-        tree.add(5).add(3).add(2).add(10).add(11)
-            .add(10).add(1).add(12).add(6);
-
-    assert(tree.minElem() == 1);
-}
-
-void testMax() {
-    BSTree<int> tree;
-        tree.add(5).add(3).add(2).add(10).add(11)
-            .add(10).add(1).add(12).add(6);
-
-    assert(tree.maxElem() == 12);
-
-}
-
-void testRemove() {
-    BSTree<int> tree;
-        tree.add(5).add(3).add(2).add(10).add(11)
-            .add(10).add(1).add(12).add(6);
-    tree.deleteElement(5);
-    assert(tree.maxElem() == 12);
-}
-
-void testLevel() {
-        BSTree<int> tree;
-        tree.add(5).add(3).add(2).add(10).add(11)
-            .add(10).add(1).add(12).add(6);
-
-        vector<int> level = tree.level(1);
-        vector<int> assertVect;
-        assertVect.push_back(3);
-        assertVect.push_back(10);
-
-        for (int i = 0; i < level.size(); i++) {
-            assert(level[i] == assertVect[i]);
-        }
-
-}
-
-void testSerializeSorted() {
-    BSTree<int> tree;
-
-    ifstream binaryFileDeser;
-    binaryFileDeser.open("bintree.bin", ios::binary );
-    tree.deserializeFromStream(binaryFileDeser);
-
-    ofstream result;
-    result.open("output.txt");
-    tree.serializeSorted(result);
-    result.close();
-
-}
-
-void testMember() {
-    BSTree<int> tree;
-    tree.add(1);
-    tree.add(2);
-    tree.add(3);
-    tree.add(4);
-    assert(tree.member(1));
-    assert(tree.member(2));
-    assert(tree.member(3));
-    assert(tree.member(4));
-    assert(!tree.member(5));
-
-}
-
-void testIsomorphic() {
-    BSTree<int> first;
-    BSTree<char> second;
-    first.add(5);
-    first.add(3);
-    first.add(6);
-
-    second.add('b');
-    second.add('a');
-    second.add('c');
-
-    assert(first.isomorphicTo(second));
-}
-
-void testAllPaths() {
-    BSTree<int> tree;
-    tree.add(1);
-    tree.add(-1);
-    tree.add(2);
-    tree.add(3);
-
-    vector<vector<int>> result = tree.allPaths();
-
-    for (int i = 0; i < result.size(); i++) {
-        for (int j = 0; j < result[i].size(); j++) {
-            cout << result[i][j] << " ";
-        }
-        cout << endl;
+   vector<vector<string>> levels = tree.allLevels();
+   for (int i = 0; i < levels.size(); i++) {
+    for (int j = 0; j < levels.size(); j++) {
+        cout << levels[i][j];
     }
+    cout << endl;
+   }
+//   string rootSentence = levels[0][0];
+//   for (int i = 1; i < levels.size(); i++) {
+//        string currString;
+//        for (int j = 0; j < levels[i].size(); j++) {
+//                currString += levels[i][j];
+//        }
+//        cout << "crr STRING " << currString << endl;
+//        if (i > 0) {
+//           if (currString.compare(rootSentence) != 0)
+//               return false;
+//       }
+//   }
+//   cout << endl ;
+//   for (int i = 0; i < result.size(); i++) {
+//    //cout << result[i] << endl;
+//   }
+   return true;
 }
 
-void testSize() {
-    BSTree<int> tree;
-    tree.add(1);
-    tree.add(1);
-    tree.add(1);
-    tree.add(1);
-    assert(tree.size() == 4);
 
-}
-
-void sameParent() {
-    BSTree<int> tree;
-    tree.add(5);
-    tree.add(6);
-    tree.add(2);
-    tree.add (1);
-    tree.add(3);
-    assert(tree.sameParent(1,3) == 2);
-}
-
-void testPath() {
-    BSTree<int> tree;
-    tree.add(5);
-    tree.add(-1);
-    tree.add(6);
-    tree.add(2);
-    tree.add(3);
-
-    vector<int> path = tree.getPath(3);
-    assert(path.size() == 4);
-    assert(path[0] = 5);
-    assert(path[1] = -1);
-    assert(path[2] = 2);
-    assert(path[3] = 3);
-}
-
-void testBalancedTree() {
-    BSTree<int> tree;
-    tree.add(10);
-    tree.add(11);
-    tree.add(9);
-    assert(tree.isBalanced());
-
-    tree.add(8);
-    tree.add(7);
-    tree.add(6);
-    assert(!tree.isBalanced());
-
-    BSTree<int> tree2;
-    tree2.add(5);
-    tree2.add(3);
-    tree2.add(4);
-    tree2.add(20);
-    tree2.add(17);
-    tree2.add(18);
-
-    assert(!tree2.isBalanced());
-}
-
-void testAllLevels() {
-    BSTree<int> tree;
-    tree.add(5);
-    tree.add(3);
-    tree.add(4);
-    tree.add(20);
-    tree.add(17);
-    tree.add(18);
-
-    vector<vector<int>> result = tree.allLevels();
-
-    for (int i = 0; i < result.size(); i++) {
-        for (int j = 0; j < result[i].size(); j++) {
-            cout << " " << result[i][j];
-        }
-        cout << "\n";
-    }
-
-}
-void checkTree() {
-    BSTree<int> tree;
-    tree.add(15);
-    tree.add(1);
-    tree.add(5);
-    vector<vector<int>> levels = tree.allLevels();
-    for (int i = 0; i < levels.size(); i++) {
-        for (int j = 0; j < levels[i].size(); j++){
-            cout << "l[" << i << "][" << j << "]=" << levels[i][j] << endl;
-        }
-    }
-}
 int main() {
-    testMember();
-    testMax();
-    testMin();
-    testRemove();
-    testLevel();
-    testSerializeSorted();
-    testIsomorphic();
-    testAllPaths();
-    testSize();
-    testBalancedTree();
-    sameParent() ;
-    testPath();
-    testAllLevels();
-    checkTree();
+//    testMember();
+//    testMax();
+//    testMin();
+//    testRemove();
+//    testLevel();
+//    testSerializeSorted();
+//    testIsomorphic();
+//    testAllPaths();
+//    testSize();
+//    testBalancedTree();
+//    sameParent() ;
+//    testPath();
+//    testAllLevels();
+    cout << checkTree();
     return 0;
 }

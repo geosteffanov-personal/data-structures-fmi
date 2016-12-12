@@ -624,18 +624,6 @@ void testAllLevels() {
     }
 
 }
-void checkTree() {
-    BSTree<int> tree;
-    tree.add(15);
-    tree.add(1);
-    tree.add(5);
-    vector<vector<int>> levels = tree.allLevels();
-    for (int i = 0; i < levels.size(); i++) {
-        for (int j = 0; j < levels[i].size(); j++){
-            cout << "l[" << i << "][" << j << "]=" << levels[i][j] << endl;
-        }
-    }
-}
 int main() {
     testMember();
     testMax();
@@ -650,6 +638,16 @@ int main() {
     sameParent() ;
     testPath();
     testAllLevels();
-    checkTree();
     return 0;
+}
+
+
+
+
+bool check_tree(BSTree<string> tree) {
+
+
+
+
+    return true;
 }

@@ -93,12 +93,43 @@ int calculateExpression(char*& expression) {
         return ((*expression)-'0');
 }
 
+/*
+    даден масив и числа а, б.
+    първо отпечатва чилата по-малки от a, после числата между а и b,
+    и накрая числата между b.
+    без масиви, с 1 обхождане
+*/
 
+void printFunny(int* arr, int n, int a, int b, int i) {
+    if (i == n) {
+        return;
+    }
+    if(arr[i] < a) {
+        cout << arr[i] << endl;
+        printFunny(arr, n, a, b, i+1);
+        return;
+    }
+    if (arr[i] >= a && arr[i] <=b) {
+        printFunny(arr, n, a, b, i + 1);
+        cout << arr[i] << endl;
+        return;
+    }
+
+//    printFunny(arr, n, a, b, i + 1);
+//    cout << arr[i] << endl;
+//    return;
+}
 
 int main() {
-    char* expr = shuntingYard("(((3@2)$2)@(3@5))");
-    reverse(expr);
-    cout << calculateExpression(expr);
+//    char* expr = shuntingYard("(((3@2)$2)@(3@5))");
+//    reverse(expr);
+//    cout << calculateExpression(expr);
+//    cout << boolalpha << true;
+    int massive[] = {3, 2, 7, 2, 3, 4, 10, 21};
+    int a = 3;
+    int b = 8;
+    printFunny(massive, 8, a, b, 0);
+
     return 0;
 
 }

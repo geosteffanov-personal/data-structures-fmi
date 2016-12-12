@@ -65,12 +65,12 @@ public:
                    Frame newTop;
                    newTop.opCode = VALUE;
                    newTop.value = 1;
-                   opStack.push(newTop);
+                   helperStack.push(newTop);
                 } else if (topOp.n == 1) {
                     Frame newTop;
                     newTop.opCode = VALUE;
                     newTop.value = 2 * x;
-                    opStack.push(newTop);
+                    helperStack.push(newTop);
                 } else {
                     int n = topOp.n;
                     /* here comes a big else clause */
@@ -115,7 +115,7 @@ public:
                  result.opCode = VALUE;
                  result.value = first.value * second.value;
 
-                 opStack.push(result);
+                 helperStack.push(result);
                  break;
 
             case SUBT:
@@ -128,19 +128,11 @@ public:
                   result.opCode = VALUE;
                   result.value = second.value - first.value;
 
-                  opStack.push(result);
+                  helperStack.push(result);
                   break;
             }
-            if (opStack.empty() && helperStack.empty()){
-                    return topOp.value;
-            }
-
-            while(!helperStack.empty()) {
-                Frame toPush = helperStack.top();
-                helperStack.pop();
-                opStack.push(toPush);
-            }
         }
+        return helperStack.top().value;
     }
 };
 
