@@ -1,6 +1,9 @@
 #include<iostream>
+#include <iomanip>
+#include<fstream>
 #include <vector>
 #include <cstring>
+#include <sstream>
 #include<unordered_map>
 
 #define TBLTN '\t'
@@ -13,6 +16,14 @@
 
 using namespace std;
 
+const char delimiters[] = { '\t',
+                                ',',
+                                '!',
+                                ' ',
+                                '?',
+                                '.',
+                                ' '};
+
 const string fileNames[] = {
     "file0.txt",
     "file1.txt",
@@ -21,64 +32,72 @@ const string fileNames[] = {
     "file4.txt"
 };
 
-vector<string> tokenize(char* word) {
+vector<string> tokenize(char word[]) {
     const char delimiters[] = { '\t',
                                 ',',
                                 '!',
                                 ' ',
                                 '?',
-                                '.'};
+                                '.',
+                                ' '};
     vector<string> tokens;
-    char* res;
-    res = strtok(word, ",");
-    if (res != NULL) {
-        cout << res << endl;
-        string token (res);
-        cout << "token: " << token << endl;
-        tokens.push_back(token);
-    }
+    char* res = strtok(word, delimiters);
 
     while(res != NULL) {
-        res = strtok(NULL, ",");
         string token(res);
-        if (res != NULL) {
-            cout << res << endl;
-            cout << "token: " << token << endl;
-            tokens.push_back(token);
-        }
+        tokens.push_back(token);
+        res = strtok(NULL, delimiters);
     }
 
     return tokens;
 }
-/*
-unordered_map<string, int> mapFile(ifstream& inFile) {
-    unordered_map<string, int> result;
-    string fileString;
-    while(inFile.eof()) {
-        getline(inFile, fileString);
-        vector<string> currentTokens =  tokenize(fileString);
 
-        for (int i = 0; i < currentTokens.size(); i++) {
-            string currentToken = currentTokens[i];
-            if (!(result.find(currentToken) != result.end())) {
-                result[currentToken] = 0;
+void inFile(ifstream& inFile, string name, unordered_map<string, unordered_map<string, bool>>& hmap) {
+   string inputString;
+   vector<bool> found;
+    while(!inFile.eof()) {
+        getline(inFile, inputString, delimiters[0]);
+
+        vector<string> currentTokens =  tokenize(&inputString[0]);
+        for(string tk : currentTokens) {
+            if (hmap.find(tk) != hmap.end()) {
+                hmap[tk][name] = true;
             }
-            result[currentToken] += 1;
         }
     }
-
-    return result;
 }
-*/
+
+void checkFiles(vector<string> files, unordered_map<string, unordered_map<string, bool>>& hmap) {
+    for (string fileName : files) {
+            ifstream fileStr(fileName);
+            inFile(fileStr, fileName, hmap);
+            fileStr.close();
+    }
+}
+
 
 int main() {
- // string input;
-  //getline()
-  //char he[] = "aa,bb,cc,dd";
-  //vector<string> result = tokenize(he);
-  //for (int i = 0; i < result.size(); i++) {
-  //  cout << result[i] << endl;
-  //}
-  string test(NULL);
+  char word[] = "hello,world:hi";
+  vector<string> res = tokenize(word);
+  unordered_map<string, unordered_map<string, bool>> mmap;
+  vector<string> fileNames;
+  fileNames.push_back("file1.txt");
+  fileNames.push_back("file2.txt");
+  fileNames.push_back("file3.txt");
+  fileNames.push_back("file4.txt");
+  for (string crrStr : res) {
+     for(string fileNm : fileNames) {
+        mmap[crrStr][fileNm] = false;
+     }
+  }
+  checkFiles(fileNames, mmap);
+
+  for (string crrStr : res) {
+    for (string fileName : fileNames) {
+        cout << "FOR " << crrStr << ", FOR FILE " << fileName << ":: " << boolalpha << mmap[crrStr][fileName] << endl;
+    }
+  }
+
   return 0;
 }
+
