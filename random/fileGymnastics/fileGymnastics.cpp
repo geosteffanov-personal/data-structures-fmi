@@ -24,14 +24,6 @@ const char delimiters[] = { '\t',
                                 '.',
                                 ' '};
 
-const string fileNames[] = {
-    "file0.txt",
-    "file1.txt",
-    "file2.txt",
-    "file3.txt",
-    "file4.txt"
-};
-
 vector<string> tokenize(char word[]) {
     const char delimiters[] = { '\t',
                                 ',',
