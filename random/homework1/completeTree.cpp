@@ -1,5 +1,4 @@
 #include <iostream>
-#include <vector>
 #include <assert.h>
 using namespace std;
 template <class T>
@@ -103,22 +102,6 @@ private:
         subTreeRoot = NULL;
     }
 
-    void allLevels(Node<T>* subTreeRoot, int height, vector<vector<T>>& result) {
-        if (subTreeRoot == NULL) {
-            return;
-        }
-
-        if (result.size() < height) {
-            vector<T> thisLevel;
-            thisLevel.push_back(subTreeRoot->data);
-            result.push_back(thisLevel);
-        } else {
-            result[height - 1].push_back(subTreeRoot->data);
-        }
-
-        allLevels(subTreeRoot->left, height + 1, result);
-        allLevels(subTreeRoot->right, height + 1, result);
-    }
 public:
     BSTree() {
         root = NULL;
@@ -146,13 +129,6 @@ public:
     BSTree<T>& add(const T& element) {
         add(root, element);
         return *this;
-    }
-
-    vector<vector<T>> allLevels() {
-        vector<vector<T>> result;
-        allLevels(root, 1, result);
-
-        return result;
     }
 };
 
