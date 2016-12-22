@@ -57,6 +57,12 @@ class BSTree  {
         return rightVal + crrVal + leftVal;
     }
 
+    Node<T>* copyTree(Node<T>* other) {
+        if (other == nullptr)
+            return nullptr;
+        return new Node<T>(other->data, copyTree(other->left), copyTree(other->right));
+    }
+
     void deleteTree(Node<T>*& subTreeRoot) {
         if (subTreeRoot == NULL)
             return;
@@ -68,9 +74,25 @@ class BSTree  {
 
         subTreeRoot = NULL;
     }
+
 public:
     BSTree() {
         root = NULL;
+    }
+
+    BSTree(const BSTree<T>& other) {
+        root = copyTree(other);
+    }
+
+    BSTree<T>& operator=(const BSTree<T>& other) {
+        if (this != &other) {
+            deleteTree(root);
+            root = copyTree(other);
+        }
+    }
+
+    ~BSTree() {
+        deleteTree(root);
     }
 
     BSTree<T>& add(const T& element) {

@@ -7,56 +7,13 @@ class Queue {
     stack<T> head;
     stack<T> tail;
 
-    void emptyQueue();
-
 public:
-    Queue();
-    Queue(const Queue<T>& other);
-    Queue& operator=(const Queue<T>& other);
-    ~Queue();
 
     void push(const T& data);
     T front();
     void pop();
     bool empty() const;
 };
-template <class T>
-Queue<T>::Queue() : head(), tail() {}
-
-template <class T>
-Queue<T>::Queue(const Queue<T>& other) : head(), tail() {
-    assert(head.empty());
-    assert(tail.empty());
-    head = other.head;
-    tail =other.tail;
-}
-
-template <class T>
-Queue<T>& Queue<T>::operator=(const Queue<T>& other) {
-    if (this != &other) {
-            emptyQueue();
-            assert(head.empty());
-            assert(tail.empty());
-            head = other.head;
-            tail = other.tail;
-    }
-    return *this;
-}
-
-template <class T>
-void Queue<T>::emptyQueue() {
-    while(!head.empty()) {
-        head.pop();
-    }
-    while (!tail.empty()) {
-        tail.pop();
-    }
-}
-
-template <class T>
-Queue<T>::~Queue() {
-    emptyQueue();
-}
 
 template <class T>
 void Queue<T>::push(const T& data) {
@@ -93,39 +50,58 @@ bool Queue<T>::empty() const {
 }
 
 /* tests */
-void testInitialization(){
-    Queue<int> q;
-    assert(q.empty());
-    Queue<int> q2(q);
-    assert(q2.empty());
-}
-void testAssignment() {
-    Queue<int> q;
-    Queue<int> p;
-    p = q;
-    assert(p.empty());
+void testEmptyConstruction() {
+    Queue<int> queues[10];
+    for (int i = 0; i < 10; i++) {
+        assert(queues[i].empty());
+    }
 }
 
-void testPushPop() {
-    Queue<int> q;
-    q.push(1);
-    q.push(2);
-    q.push(3);
-    assert(q.front() == 1);
-    Queue<int> p(q);
-    assert(!p.empty());
-    assert(p.front() == 1);
-    p.pop();
-    assert(p.front() == 2);
-    p.pop();
-    assert(p.front() == 3);
-    p.pop();
-    assert(p.empty());
+void testCopyConstruction() {
+    Queue<int> queues[10];
+    for (int i = 0; i < 10; i++) {
+        for (int j = 0; j <= i; j++) {
+            queues[i].push(j);
+        }
+    }
+    for (int i = 0; i < 10; i++) {
+        Queue<int> testQ(queues[i]);
+        for (int j = 0; j <= i; j++) {
+            assert(testQ.front() == j);
+            testQ.pop();
+        }
+        assert(testQ.empty());
+    }
+
+    for (int i = 0; i < 10; i++) {
+        assert(!queues[i].empty());
+    }
+}
+
+void testAssignemnt() {
+    Queue<int> queues[10];
+    Queue<int> testQ;
+    for (int i = 0; i < 10; i++) {
+        for (int j = 0; j <= i; j++) {
+            queues[i].push(j);
+        }
+    }
+    for (int i = 0; i < 10; i++) {
+        Queue<int> testQ = queues[i];
+        for (int j = 0; j <= i; j++) {
+            assert(testQ.front() == j);
+            testQ.pop();
+        }
+        assert(testQ.empty());
+    }
+
+    for (int i = 0; i < 10; i++) {
+        assert(!queues[i].empty());
+    }
 }
 
 int main() {
-    testInitialization();
-    testAssignment();
-    testPushPop();
+    testEmptyConstruction();
+    testCopyConstruction();
+    testAssignemnt();
 }
-
