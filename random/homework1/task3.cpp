@@ -152,21 +152,22 @@ int pow10(int exponent) {
 }
 #define CALCULATE 0
 #define TRAVERSE 1
-int value(BTree<int>& tree) {
+using digit = unsigned int;
+
+stack<digit> value(BTree<digit>& tree) {
     struct Frame {
-        iter<int> root;
+        iter<digit> root;
         int opCode;
         int value;
-        Frame(int _op, int _val, iter<int> _r) : opCode(_op), value(_val), root(_r) {}
+        Frame(int _op, int _val, iter<digit> _r) : opCode(_op), value(_val), root(_r) {}
         Frame(const Frame& other) : root(other.root), opCode(other.opCode), value(other.value) {}
     };
 
-    iter<int> root = tree.iterator();
-    if (root.empty())
-        return 0;
+    iter<digit> root = tree.iterator();
+    stack<digit> result;
 
-    int result = 0;
-    int exponent = 0;
+    if (root.empty())
+        return result;
 
     stack<Frame> treeSt;
     Frame first(TRAVERSE, -1, root);
@@ -178,9 +179,9 @@ int value(BTree<int>& tree) {
         Frame crr = treeSt.top();
         treeSt.pop();
         if (crr.opCode == TRAVERSE) {
-            iter<int> crrRoot = crr.root;
-            iter<int> left = crrRoot.goLeft();
-            iter<int> right = crrRoot.goRight();
+            iter<digit> crrRoot = crr.root;
+            iter<digit> left = crrRoot.goLeft();
+            iter<digit> right = crrRoot.goRight();
 
             if (!right.empty()) {
                 Frame rightTraverse(TRAVERSE, -1, right);
@@ -196,15 +197,65 @@ int value(BTree<int>& tree) {
             }
         } else {
             assert(crr.opCode == CALCULATE);
-            int crrDigit = crr.value;
-            int toAdd = crrDigit * pow10(exponent);
-            exponent++;
-            result += toAdd;
+            result.push(crr.value);
         }
     }
 
     return result;
 }
-int sumOfDigitTrees(BTree<int>&first, BTree<int> &second) {
-    return value(first) + value(second);
+stack<digit> sumStack(BTree<digit>&first, BTree<digit> &second) {
+    stack<digit> firstSt = value(first);
+    stack<digit> revFirst;
+    while(!firstSt.empty()) {
+        revFirst.push(firstSt.top());
+        firstSt.pop();
+    }
+
+    stack<digit> secondSt = value(second);
+    stack<digit> revSecond;
+    while(!secondSt.empty()) {
+        revSecond.push(secondSt.top());
+        secondSt.pop();
+    }
+
+    stack<digit> result;
+    digit carry = 0;
+    digit crrSum = 0;
+    digit digitToStore = 0;
+
+    while (!revFirst.empty() && !revSecond.empty()) {
+        crrSum = revFirst.top() + revSecond.top() + carry;
+        revFirst.pop(); revSecond.pop();
+        digitToStore = crrSum % 10;
+        result.push(digitToStore);
+        carry = crrSum / 10;
+    }
+    while (!revFirst.empty()) {
+            crrSum = revFirst.top() + carry;
+            revFirst.pop();
+            digitToStore = crrSum % 10;
+            result.push(digitToStore);
+            carry = crrSum / 10;
+    }
+    while (!revSecond.empty()) {
+        crrSum = revSecond.top() + carry;
+        revSecond.pop();
+        digitToStore = crrSum % 10;
+        result.push(digitToStore);
+        carry = crrSum / 10;
+    }
+    if (carry != 0) {
+        result.push(carry);
+    }
+
+    return result;
+}
+
+int sumDigitTrees(BTree<digit>& tree1, BTree<digit>& tree2) {
+    stack<digit> result = sumStack(tree1, tree2);
+    while (!result.empty()) {
+        cout << result.top();
+        result.pop();
+    }
+    return 0;
 }

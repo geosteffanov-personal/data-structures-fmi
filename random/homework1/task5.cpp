@@ -15,9 +15,3 @@ int CrownSequence(int N, int p) {
         hq.push(2 * crr);
     }
  }
-int main() {
-   for (int i = 0; i < 20; i++) {
-    cout << CrownSequence(6, i) << endl;
-   }
-
-}
