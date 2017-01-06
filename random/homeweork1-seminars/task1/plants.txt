@@ -1,0 +1,9 @@
+plantA
+3.3
+2
+planB
+4.5
+4.7
+plantC
+990
+1011
