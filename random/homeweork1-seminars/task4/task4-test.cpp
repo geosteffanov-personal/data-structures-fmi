@@ -16,6 +16,7 @@ void testReadWord() {
     tree.add('m', "LL");
     assert(readWord(tree, "hell"));
     assert(!(readWord(tree, "apple")));
+    assert(!(readWord(tree, "rhe")));
 }
 int main() {
     testReadWord();

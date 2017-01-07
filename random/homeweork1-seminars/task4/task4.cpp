@@ -149,22 +149,29 @@ bool helpConsecutive (const iter<char>& iterator, char const* word) {
     if (iterator.empty() && *word == 0) {
         return true;
     }
+
     if (iterator.empty())
         return false;
+
     if (*word == 0)
         return true;
+
     if (iterator.get() != *word) return false;
+
     iter<char> left = iterator.goLeft();
     iter<char> right = iterator.goRight();
-    return helpConsecutive(left) || helpConsecutive(right);
+
+    return helpConsecutive(left, word + 1) || helpConsecutive(right, word + 1);
 }
 
 bool help(const iter<char>& iterator, char const* word) {
     if (iterator.empty() && *word == 0) {
         return true;
     }
+
     if (iterator.empty())
         return false;
+
     if (*word == 0)
         return true;
 
