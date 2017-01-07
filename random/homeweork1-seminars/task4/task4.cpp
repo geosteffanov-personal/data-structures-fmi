@@ -145,6 +145,20 @@ public:
 template <class T>
 using iter = typename BTree<T>::TreeIterator;
 
+bool helpConsecutive (const iter<char>& iterator, char const* word) {
+    if (iterator.empty() && *word == 0) {
+        return true;
+    }
+    if (iterator.empty())
+        return false;
+    if (*word == 0)
+        return true;
+    if (iterator.get() != *word) return false;
+    iter<char> left = iterator.goLeft();
+    iter<char> right = iterator.goRight();
+    return helpConsecutive(left) || helpConsecutive(right);
+}
+
 bool help(const iter<char>& iterator, char const* word) {
     if (iterator.empty() && *word == 0) {
         return true;
@@ -157,10 +171,10 @@ bool help(const iter<char>& iterator, char const* word) {
     iter<char> left = iterator.goLeft();
     iter<char> right = iterator.goRight();
 
-    if (iterator.get() == *word)
-       return help(left, word + 1) || help(right, word + 1);
-    else
-       return help(left, word) || help(right, word);
+    return (iterator.get() == *word && helpConsecutive(left, word + 1)) ||
+            (iterator.get() == *word && helpConsecutive(right, word + 1)) ||
+            help(left,word) ||
+            help(right, word);
 }
 
 bool readWord( BTree<char> const & tree, char const* word) {
